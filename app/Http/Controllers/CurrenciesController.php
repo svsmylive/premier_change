@@ -16,7 +16,14 @@ class CurrenciesController
 
         $query = $currencyFrom . $currencyTo;
 
-        $response = Http::get('https://garantex.org/api/v2/depth?market=' . $query);
+        try {
+            $response = Http::get('https://garantex.org/api/v2/depth?market=' . $query);
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ];
+        }
 
         $asks = $response->json()['asks']; // ордера покупки
         $bids = $response->json()['bids']; // ордера продажи
