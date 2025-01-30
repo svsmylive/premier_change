@@ -17,7 +17,11 @@ class CurrenciesController
         $query = $currencyFrom . $currencyTo;
 
         try {
-            $response = Http::get('https://garantex.org/api/v2/depth?market=' . $query);
+            $request = Http::baseUrl('https://garantex.org/');
+            $request->timeout(30);
+            $request->connectTimeout(30);
+
+            $response = $request->get('api/v2/depth?market=' . $query);
         } catch (\Throwable $e) {
             return [
                 'success' => false,
