@@ -28,7 +28,7 @@ class CurrenciesController
 
                 $json = $response->json();
 
-                Cache::put('currencies', $json, CarbonInterval::minutes(30));
+                Cache::put('currencies', $json, CarbonInterval::hours(24));
 
                 return $json;
             });
