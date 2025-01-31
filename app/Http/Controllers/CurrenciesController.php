@@ -26,9 +26,11 @@ class CurrenciesController
 
                 $response = $request->get('api/v2/depth?market=' . $query);
 
-                Cache::put('currencies', $response, CarbonInterval::minutes(30));
+                $json = $response->json();
 
-                return $response;
+                Cache::put('currencies', $json, CarbonInterval::minutes(30));
+
+                return $json;
             });
         } catch (\Throwable $e) {
             return [
@@ -37,8 +39,8 @@ class CurrenciesController
             ];
         }
 
-        $asks = $response->json()['asks']; // ордера покупки
-        $bids = $response->json()['bids']; // ордера продажи
+        $asks = $response['asks']; // ордера покупки
+        $bids = $response['bids']; // ордера продажи
 
         $averagePrice = 0.0;
         $remainder = 0.0;
