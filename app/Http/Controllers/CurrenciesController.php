@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SearchCurrenciesRequest;
+use Carbon\CarbonInterval;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class CurrenciesController
@@ -17,11 +19,17 @@ class CurrenciesController
         $query = $currencyFrom . $currencyTo;
 
         try {
-            $request = Http::baseUrl('https://garantex.org/');
-            $request->timeout(30);
-            $request->connectTimeout(30);
+            $response = Cache::get('currencies', function () use ($query) {
+                $request = Http::baseUrl('https://garantex.org/');
+                $request->timeout(30);
+                $request->connectTimeout(30);
 
-            $response = $request->get('api/v2/depth?market=' . $query);
+                $response = $request->get('api/v2/depth?market=' . $query);
+
+                Cache::put('currencies', $response, CarbonInterval::minutes(30));
+
+                return $response;
+            });
         } catch (\Throwable $e) {
             return [
                 'success' => false,
