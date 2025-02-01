@@ -18,8 +18,10 @@ class CurrenciesController
 
         $query = $currencyFrom . $currencyTo;
 
+        $cacheKey = 'currencies_' . $query;
+
         try {
-            $response = Cache::get('currencies', function () use ($query) {
+            $response = Cache::get($cacheKey, function () use ($query, $cacheKey) {
                 $request = Http::baseUrl('https://garantex.org/');
                 $request->timeout(30);
                 $request->connectTimeout(30);
@@ -28,7 +30,7 @@ class CurrenciesController
 
                 $json = $response->json();
 
-                Cache::put('currencies', $json, CarbonInterval::hours(24));
+                Cache::put($cacheKey, $json, CarbonInterval::hours(24));
 
                 return $json;
             });
