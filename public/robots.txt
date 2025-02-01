@@ -1,2 +1,4 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Allow: /
+Sitemap: https://premier-exchange.com/sitemap.xml
