@@ -18,7 +18,7 @@ class CurrenciesController
 
         $query = $currencyFrom . $currencyTo;
 
-        $cacheKey = 'currencies_' . $query;
+        $cacheKey = 'currencies_' . $query . (int)$clientSum;
 
         try {
             $response = Cache::get($cacheKey, function () use ($query, $cacheKey) {
@@ -30,7 +30,7 @@ class CurrenciesController
 
                 $json = $response->json();
 
-                Cache::put($cacheKey, $json, CarbonInterval::hours(24));
+                Cache::put($cacheKey, $json, CarbonInterval::hour());
 
                 return $json;
             });
