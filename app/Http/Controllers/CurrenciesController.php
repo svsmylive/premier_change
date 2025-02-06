@@ -52,7 +52,7 @@ class CurrenciesController
             $volumeCurrency = (float)$bid['volume'];
             $bidPrice = (float)$bid['price'];
 
-            if ($clientSum <= $volumeCurrency) {
+            if ($clientSum <= $volumeCurrency && $remainder == 0) {
                 $averagePrice = $bidPrice;
 
                 break;
