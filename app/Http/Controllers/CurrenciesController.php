@@ -94,13 +94,13 @@ class CurrenciesController
             }
 
             $averagePrice = $total / $clientSum;
-            $averagePrice = $averagePrice - $averagePrice * 0.03; //наша наценка
+            $averagePrice = $averagePrice - $averagePrice * 0.007; //наша наценка
 
             $total = round($averagePrice, 2) * $clientSum;
         }
 
         if ($total == 0) {
-            $averagePrice = $averagePrice - $averagePrice * 0.03; //наша наценка
+            $averagePrice = $averagePrice - $averagePrice * 0.007; //наша наценка
 
             $total = round($averagePrice, 2) * $clientSum;
         }
