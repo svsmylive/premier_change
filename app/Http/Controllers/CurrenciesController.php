@@ -6,6 +6,7 @@ use App\Http\Requests\SearchCurrenciesRequest;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class CurrenciesController
 {
@@ -134,7 +135,7 @@ class CurrenciesController
                 curl_setopt(
                     $ch,
                     CURLOPT_URL,
-                    "https://gateway.abcex.io/api/v1/markets/price?marketId=" . urlencode($query)
+                    "https://gateway.abcex.io/api/v1/markets/price?marketId=" . urlencode(Str::upper($query))
                 );
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
