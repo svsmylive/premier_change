@@ -167,7 +167,7 @@ class CurrenciesController
 
         $averagePrice = $askPrice - $askPrice * 0.003; //наша наценка
 
-        $total = round($askPrice, 2) * $clientSum;
+        $total = round($averagePrice, 2) * $clientSum;
 
         return [
             'price' => number_format($averagePrice, 2, '.', ' '),
