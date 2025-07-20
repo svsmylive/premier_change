@@ -16,3 +16,6 @@ Route::get('/sitemap.xml', function () {
         ->add(Url::create('/'))
         ->toResponse(request());
 });
+
+
+Route::get('/rates', [CurrenciesController::class, 'getRates'])->name('rates');
