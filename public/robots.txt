@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: /admin/
 Allow: /
-Sitemap: https://premier-exchange.com/sitemap.xml
+Sitemap: https://bit-prime.com/sitemap.xml
