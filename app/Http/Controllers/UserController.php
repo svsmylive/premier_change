@@ -96,6 +96,45 @@ class UserController
 
     public function account()
     {
-        return response()->json(['success' => true, 'message' => 'Тест']);
+        $user = auth()->user();
+        $user->load(['referrals', 'orders']);
+
+        $orders = [];
+        $referrals = [];
+
+        foreach ($user->orders as $order) {
+            $orders[] = [
+                'number' => $order->id,
+                'date' => $order->created_at->timezone('Europe/Moscow')->format('d.m.Y H:i'),
+                'course_from' => $order->course_from,
+                'course_to' => $order->course_to,
+                'valute_from' => $order->valute_from,
+                'valute_to' => $order->valute_to,
+                'amount_from' => $order->sum_from,
+                'amount_to' => $order->sum_to,
+//                'status' => 'В процессе', //todo
+            ];
+        }
+
+        foreach ($user->referrals as $referral) {
+            $referrals[] = [
+                'number' => $referral->id,
+                'date' => $referral->created_at->timezone('Europe/Moscow')->format('d.m.Y H:i'),
+                'requisite' => $referral->requisite,
+                'amount' => $referral->amount,
+//                'status' => 'В процессе', //todo
+            ];
+        }
+
+        return [
+            'referral_total' => 0,  //todo
+            'referral_received' => 0,  //todo
+            'referral_in_process' => 0,  //todo
+            'referral_percent' => $user->ref_percent,
+            'referral_link' => 'https://bit-prime.ru/?rid=' . $user->id,
+            'balance' => $user->balance, //todo
+            'referrals' => $referrals,
+            'orders' => $orders,
+        ];
     }
 }

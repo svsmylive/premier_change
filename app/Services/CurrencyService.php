@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 
 class CurrencyService
 {
+    public const PLUS = 0.003; //наша наценка
+
     public function get(string $currencyFrom, string $currencyTo, float $clientSum = 1.0): array
     {
         $query = Str::upper($currencyFrom) . '/' . Str::upper($currencyTo);
@@ -89,13 +91,13 @@ class CurrencyService
             }
 
             $averagePrice = $total / $clientSum;
-            $averagePrice = $averagePrice - $averagePrice * 0.003; //наша наценка
+            $averagePrice = $averagePrice - $averagePrice * self::PLUS; //наша наценка
 
             $total = round($averagePrice, 2) * $clientSum;
         }
 
         if ($total == 0) {
-            $averagePrice = $averagePrice - $averagePrice * 0.003; //наша наценка
+            $averagePrice = $averagePrice - $averagePrice * self::PLUS; //наша наценка
 
             $total = round($averagePrice, 2) * $clientSum;
         }
