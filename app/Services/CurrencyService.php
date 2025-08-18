@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class CurrencyService
 {
-    public const PLUS = 0.003; //наша наценка
+    public const PLUS = 0.0035; //наша наценка
 
     public function get(string $currencyFrom, string $currencyTo, float $clientSum = 1.0): array
     {
