@@ -198,9 +198,10 @@ class CurrenciesController
         $currencyFrom = 'usdt';
         $currencyTo = 'rub';
 
-        $data = $this->currencyService->get($currencyFrom, $currencyTo);
+        $usdtToRub = $this->currencyService->get($currencyFrom, $currencyTo);
+        $rubToUsdt = $this->currencyService->get($currencyTo, $currencyFrom);
 
-        if (!isset($data['price'])) {
+        if (!isset($usdtToRub['price'])) {
             return response()->json(['success' => false, 'message' => 'error']);
         }
 
@@ -209,10 +210,20 @@ class CurrenciesController
                 'from' => 'USDTTRC20',
                 'to' => 'CASHRUB',
                 'in' => '1',
-                'out' => $data['price'],
+                'out' => $usdtToRub['price'],
                 'amount' => '30000000.00',
                 'minamount' => '5000 USDT',
                 'maxamount' => '300000 USDT',
+                'city' => 'krasn',
+            ],
+            [
+                'from' => 'CASHRUB',
+                'to' => 'USDTTRC20',
+                'in' => '1',
+                'out' => $rubToUsdt['price'],
+                'amount' => '300000.00',
+                'minamount' => '300000 CASHRUB',
+                'maxamount' => '30000000 CASHRUB',
                 'city' => 'krasn',
             ],
         ];
