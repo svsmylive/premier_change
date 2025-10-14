@@ -34,24 +34,31 @@ class CurrencyService
 
         $cacheKey = 'currencies_' . $query . '_' . (int)$clientSum;
 
-        try {
-            $response = Cache::get($cacheKey, function () use ($query) {
-                $request = Http::baseUrl('https://api.rapira.net')
-                    ->timeout(30)
-                    ->connectTimeout(30);
+//        try {
+//            $response = Cache::get($cacheKey, function () use ($query) {
+//                $request = Http::baseUrl('https://api.rapira.net')
+//                    ->timeout(30)
+//                    ->connectTimeout(30);
+//
+//                $r = $request->get('/market/exchange-plate-mini?symbol=' . $query);
+//                $json = $r->json();
+//
+//                Cache::put('currencies_' . $query . '_' . time(), $json, CarbonInterval::minutes(15));
+//                return $json;
+//            });
+//        } catch (\Throwable $e) {
+//            return [
+//                'success' => false,
+//                'message' => $e->getMessage(),
+//            ];
+//        }
 
-                $r = $request->get('/market/exchange-plate-mini?symbol=' . $query);
-                $json = $r->json();
+        $request = Http::baseUrl('https://api.rapira.net')
+            ->timeout(30)
+            ->connectTimeout(30);
 
-                Cache::put('currencies_' . $query . '_' . time(), $json, CarbonInterval::minutes(15));
-                return $json;
-            });
-        } catch (\Throwable $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-            ];
-        }
+        $r = $request->get('/market/exchange-plate-mini?symbol=' . $query);
+        $response = $r->json();
 
         // --- RUB -> USDT (special handling) ---
         if ($currencyFrom === 'rub') {
