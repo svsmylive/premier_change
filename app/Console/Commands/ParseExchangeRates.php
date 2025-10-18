@@ -172,9 +172,9 @@ class ParseExchangeRates extends Command
         $year = $now->format('Y');
         $month = $now->format('m');
         $day = $now->format('d');
-        $time = $now->format('H:i');
 
-        $dir = public_path("rates/{$year}/{$month}/{$day}");
+        $relativeDir = "rates/{$year}/{$month}/{$day}";
+        $dir = storage_path("app/{$relativeDir}");
 
         if (!is_dir($dir)) {
             mkdir($dir, 0775, true);
@@ -182,10 +182,11 @@ class ParseExchangeRates extends Command
 
         $postfix = now()->tz('Europe/Moscow')->format('d.m.Y_H:i');
         $fileName = "exchange_rates_{$postfix}.xlsx";
+        $filePath = "{$dir}/{$fileName}";
 
-        $writer->save("{$dir}/{$fileName}");
+        $writer->save($filePath);
 
-        $this->info("✅ Файл сохранён: rates/{$year}/{$month}/{$day}/{$fileName}");
+        $this->info("✅ Файл сохранён: storage/app/{$relativeDir}/{$fileName}");
     }
 
     private function getRandomHeaders(): array
