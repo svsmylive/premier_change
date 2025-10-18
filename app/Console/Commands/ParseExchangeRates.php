@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AnalyticRate;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
@@ -56,10 +57,14 @@ class ParseExchangeRates extends Command
             [
                 'url' => 'https://www.bestchange.ru/tether-trc20-to-cash-ruble-in-krasn.html',
                 'direction' => 'USDT→RUB',
+                'from' => 'USDT',
+                'to' => 'RUB',
             ],
             [
                 'url' => 'https://www.bestchange.ru/cash-ruble-to-tether-trc20-in-krasn.html',
                 'direction' => 'RUB→USDT',
+                'from' => 'RUB',
+                'to' => 'USDT',
             ],
         ];
 
@@ -120,6 +125,16 @@ class ParseExchangeRates extends Command
                             'market' => $market,
                             'markup' => $markup,
                         ];
+
+                        AnalyticRate::create([
+                            'source' => 'BestChange',
+                            'crypto_exchanger' => $exchange,
+                            'currency_from' => $source['from'],
+                            'currency_to' => $source['to'],
+                            'crypto_exchanger_course' => $rate,
+                            'crypto_exchange_course' => $market,
+                            'plus' => $markup,
+                        ]);
 
                         $count++;
                     }
