@@ -9,8 +9,8 @@ use Illuminate\Support\Str;
 
 class CurrencyService
 {
-    public const PLUS_USDT_RUB = 0.002; // наценка при продаже USDT -> RUB
-    public const PLUS_RUB_USDT = 0.004; // наценка при продаже RUB -> USDT
+    public const PLUS_USDT_RUB = 0.008; // наценка при продаже USDT -> RUB
+    public const PLUS_RUB_USDT = 0.01; // наценка при продаже RUB -> USDT
 
     public function get(string $currencyFrom, string $currencyTo, float $clientSum = 1.0): array
     {
