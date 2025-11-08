@@ -116,8 +116,7 @@ class WebhookController extends Controller
                 $rubFrom1Usdt = (float)$sellRate['price'];
 
 
-                $text = "✅ Наценка для приёма (курс обмена) обновлена.\n\n"
-                    . "ℹ️ *Информация по курсам и наценкам*\n\n"
+                $text = "✅ Наценка для приёма (RUB→USDT) обновлена.\n\n"
                     . "💹 *Текущие курсы:*\n"
                     . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
                     . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
@@ -150,8 +149,7 @@ class WebhookController extends Controller
                     $sellRate = $this->currencyService->get('usdt', 'rub', 1);
                     $rubFrom1Usdt = (float)$sellRate['price'];
 
-                    $text = "✅ Наценка для выдачи (курс обмена) обновлена.\n\n"
-                        . "ℹ️ *Информация по курсам и наценкам*\n\n"
+                    $text = "✅ Наценка для выдачи (USDT→RUB) обновлена.\n\n"
                         . "💹 *Текущие курсы:*\n"
                         . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
                         . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
