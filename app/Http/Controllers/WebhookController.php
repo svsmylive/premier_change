@@ -224,13 +224,14 @@ class WebhookController extends Controller
             [['text' => 'info']],
         ];
 
-        Http::post("https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage", [
-            'chat_id' => $chatId,
-            'reply_markup' => json_encode([
-                'keyboard' => $buttons,
-                'resize_keyboard' => true,
-            ]),
-        ]);
+        Http::post(
+            "https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage",
+            [
+                'chat_id' => $chatId,
+                'text' => "Выберите команду:",
+                'reply_markup' => json_encode(['keyboard' => $buttons, 'resize_keyboard' => true]),
+            ]
+        );
     }
 }
 
