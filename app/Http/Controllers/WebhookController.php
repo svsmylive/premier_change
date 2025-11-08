@@ -64,31 +64,28 @@ class WebhookController extends Controller
 
         if ($cmd === 'info' || $cmd === '/info') {
             try {
-                // Получаем текущие наценки
+                // Текущие наценки
                 $buyMarkup = round($this->markupService->getRubUsdt() * 100, 2);
                 $sellMarkup = round($this->markupService->getUsdtRub() * 100, 2);
 
-                // Курс покупки USDT за рубли (сколько ₽ стоит 1 USDT)
+                // Покупка USDT за рубли (сколько ₽ за 1 USDT)
                 $buyRate = $this->currencyService->get('rub', 'usdt', 10000);
                 $rubFor1Usdt = 0;
                 if (!empty($buyRate['total']) && (float)$buyRate['total'] > 0) {
                     $rubFor1Usdt = 10000 / (float)$buyRate['total'];
                 }
 
-                // Курс продажи USDT за рубли (сколько ₽ получаешь за 1 USDT)
+                // Продажа USDT за рубли (сколько ₽ получаешь за 1 USDT)
                 $sellRate = $this->currencyService->get('usdt', 'rub', 1);
                 $rubFrom1Usdt = (float)$sellRate['price'];
 
                 // Формируем красивое сообщение
-                $text = "ℹ️ *Информация по курсам и наценкам*\n\n"
-                    . "💹 *Текущие курсы (₽ за 1 USDT)*\n"
-                    . "💰 Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
-                    . "💸 Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
-                    . "⚙️ *Текущие наценки:*\n"
-                    . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
-                    . "• USDT → RUB (продажа): *{$sellMarkup}%*";
+                $text = "📊 *Bit Prime — Курсы и наценки*\n\n"
+                    . "💰 RUB→USDT | *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽* | _" . $buyMarkup . " %_\n"
+                    . "💸 USDT→RUB | *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽* | _" . $sellMarkup . " %_\n\n"
+                    . "🕒 _Обновлено: " . now()->format('d.m.Y H:i') . "_";
 
-                $this->send($chatId, $text, true); // Markdown включен
+                $this->send($chatId, $text, true); // true = Markdown (жирный и курсив работают)
             } catch (\Throwable $e) {
                 $this->send($chatId, "❌ Ошибка при получении данных:\n" . $e->getMessage());
             }
