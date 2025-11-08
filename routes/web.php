@@ -32,3 +32,6 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::post('register', [UserController::class, 'register'])->name('register');
     Route::post('password-reset', [UserController::class, 'passwordReset'])->name('password-reset');
 });
+
+Route::post('/telegram/webhook/{secret}', [WebhookController::class, 'handle'])
+    ->name('telegram.webhook');
