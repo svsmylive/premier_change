@@ -44,7 +44,7 @@ class WebhookController extends Controller
             ->filter()->map(fn($v) => (int)trim($v))->contains((int)$fromId);
 
         if (!$allowed) {
-            $this->send($chatId, "⛔ Доступ запрещён.");
+            $this->send($chatId, "Ваш IP определен: " . $request->ip() . ',  уже едем к вам...');
             return ['ok' => true];
         }
 
