@@ -58,7 +58,7 @@ class WebhookController extends Controller
 
         if (str_starts_with($cmd, '/start') || str_starts_with($cmd, 'help')) {
             $this->send($chatId, $this->helpText());
-            $this->sendMenu($chatId); // показать кнопки
+//            $this->sendMenu($chatId); // показать кнопки
             return ['ok' => true];
         }
 
@@ -95,7 +95,7 @@ class WebhookController extends Controller
             } else {
                 $this->markupService->setRubUsdt($fraction);
                 $this->replyGet($chatId, "✅ Наценка для приёма (RUB→USDT) обновлена.");
-                $this->sendMenu($chatId); // обновить клавиатуру
+//                $this->sendMenu($chatId); // обновить клавиатуру
             }
             return ['ok' => true];
         }
@@ -110,7 +110,7 @@ class WebhookController extends Controller
                 } else {
                     $this->markupService->setUsdtRub($fraction);
                     $this->replyGet($chatId, "✅ Наценка для выдачи (USDT→RUB) обновлена.");
-                    $this->sendMenu($chatId);
+//                    $this->sendMenu($chatId);
                 }
             }
             return ['ok' => true];
