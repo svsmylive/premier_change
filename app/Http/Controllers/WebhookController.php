@@ -105,8 +105,28 @@ class WebhookController extends Controller
                 $this->send($chatId, "Неверный формат. Пример: `buy 2%`", true);
             } else {
                 $this->markupService->setRubUsdt($fraction);
-                $this->replyGet($chatId, "✅ Наценка для приёма (RUB→USDT) обновлена.");
-                $this->sendMenu($chatId); // обновить клавиатуру
+
+                $buyMarkup = round($this->markupService->getRubUsdt() * 100, 2);
+                $sellMarkup = round($this->markupService->getUsdtRub() * 100, 2);
+                $buyRate = $this->currencyService->get('rub', 'usdt', 10000);
+                $rubFor1Usdt = !empty($buyRate['total']) && (float)$buyRate['total'] > 0
+                    ? 10000 / (float)$buyRate['total']
+                    : 0;
+                $sellRate = $this->currencyService->get('usdt', 'rub', 1);
+                $rubFrom1Usdt = (float)$sellRate['price'];
+
+
+                $text = "✅ Наценка для приёма (курс обмена) обновлена.\n\n"
+                    . "ℹ️ *Информация по курсам и наценкам*\n\n"
+                    . "💹 *Текущие курсы:*\n"
+                    . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
+                    . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
+                    . "⚙️ *Текущие наценки:*\n"
+                    . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
+                    . "• USDT → RUB (продажа): *{$sellMarkup}%*";
+
+                $this->send($chatId, $text, true);
+                $this->sendMenu($chatId);
             }
             return ['ok' => true];
         }
@@ -120,7 +140,26 @@ class WebhookController extends Controller
                     $this->send($chatId, "Значение вне диапазона (0–20%).", true);
                 } else {
                     $this->markupService->setUsdtRub($fraction);
-                    $this->replyGet($chatId, "✅ Наценка для выдачи (USDT→RUB) обновлена.");
+
+                    $buyMarkup = round($this->markupService->getRubUsdt() * 100, 2);
+                    $sellMarkup = round($this->markupService->getUsdtRub() * 100, 2);
+                    $buyRate = $this->currencyService->get('rub', 'usdt', 10000);
+                    $rubFor1Usdt = !empty($buyRate['total']) && (float)$buyRate['total'] > 0
+                        ? 10000 / (float)$buyRate['total']
+                        : 0;
+                    $sellRate = $this->currencyService->get('usdt', 'rub', 1);
+                    $rubFrom1Usdt = (float)$sellRate['price'];
+
+                    $text = "✅ Наценка для выдачи (курс обмена) обновлена.\n\n"
+                        . "ℹ️ *Информация по курсам и наценкам*\n\n"
+                        . "💹 *Текущие курсы:*\n"
+                        . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
+                        . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
+                        . "⚙️ *Текущие наценки:*\n"
+                        . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
+                        . "• USDT → RUB (продажа): *{$sellMarkup}%*";
+
+                    $this->send($chatId, $text, true);
                     $this->sendMenu($chatId);
                 }
             }
