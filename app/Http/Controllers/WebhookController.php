@@ -62,36 +62,37 @@ class WebhookController extends Controller
             return ['ok' => true];
         }
 
-        if ($cmd === 'rates' || $cmd === '/rates') {
+        if ($cmd === 'info' || $cmd === '/info') {
             try {
-                // Берём оба направления по 1 USDT
-                $buyRate = $this->currencyService->get('rub', 'usdt', 10000); // RUB -> USDT
-                $sellRate = $this->currencyService->get('usdt', 'rub', 1);    // USDT -> RUB
+                // Получаем текущие наценки
+                $buyMarkup = round($this->markupService->getRubUsdt() * 100, 2);
+                $sellMarkup = round($this->markupService->getUsdtRub() * 100, 2);
 
-                // Расчёт цены покупки 1 USDT в рублях:
-                // если за 10 000 ₽ купили X USDT → цена = 10 000 / X
+                // Курс покупки USDT за рубли (сколько ₽ стоит 1 USDT)
+                $buyRate = $this->currencyService->get('rub', 'usdt', 10000);
                 $rubFor1Usdt = 0;
                 if (!empty($buyRate['total']) && (float)$buyRate['total'] > 0) {
                     $rubFor1Usdt = 10000 / (float)$buyRate['total'];
                 }
 
-                // Цена продажи 1 USDT (просто значение из sellRate)
+                // Курс продажи USDT за рубли (сколько ₽ получаешь за 1 USDT)
+                $sellRate = $this->currencyService->get('usdt', 'rub', 1);
                 $rubFrom1Usdt = (float)$sellRate['price'];
 
-                $text = "💹 *Текущие курсы (₽ за 1 USDT)*\n\n"
+                // Формируем красивое сообщение
+                $text = "ℹ️ *Информация по курсам и наценкам*\n\n"
+                    . "💹 *Текущие курсы (₽ за 1 USDT)*\n"
                     . "💰 Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
-                    . "💸 Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*";
+                    . "💸 Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
+                    . "⚙️ *Текущие наценки:*\n"
+                    . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
+                    . "• USDT → RUB (продажа): *{$sellMarkup}%*";
 
-                $this->send($chatId, $text, true); // Markdown-формат
+                $this->send($chatId, $text, true); // Markdown включен
             } catch (\Throwable $e) {
-                $this->send($chatId, "❌ Ошибка при получении курсов:\n" . $e->getMessage());
+                $this->send($chatId, "❌ Ошибка при получении данных:\n" . $e->getMessage());
             }
 
-            return ['ok' => true];
-        }
-
-        if ($cmd === 'get' || $cmd === '/get') {
-            $this->replyGet($chatId);
             return ['ok' => true];
         }
 
@@ -121,27 +122,6 @@ class WebhookController extends Controller
                     $this->markupService->setUsdtRub($fraction);
                     $this->replyGet($chatId, "✅ Наценка для выдачи (USDT→RUB) обновлена.");
                     $this->sendMenu($chatId);
-                }
-            }
-            return ['ok' => true];
-        }
-
-        // alias: можно задавать напрямую ключ: value
-        if (preg_match('~^(usdt[_\-]?rub|rub[_\-]?usdt)\s+([\d\.,]+)\%?$~i', $cmd, $m)) {
-            $key = strtolower(str_replace(['-', '_'], '_', $m[1]));
-            $fraction = $this->normalizePercentToFraction($m[2]);
-
-            if ($fraction === null) {
-                $this->send($chatId, "Неверное число. Пример: `usdt_rub 0.3%`", true);
-            } else {
-                if ($fraction < 0 || $fraction > 0.2) {
-                    $this->send($chatId, "Значение вне диапазона (0–20%).", true);
-                } else {
-                    $key === 'usdt_rub'
-                        ? $this->markupService->setUsdtRub($fraction)
-                        : $this->markupService->setRubUsdt($fraction);
-
-                    $this->replyGet($chatId, "✅ Наценка обновлена для {$key}.");
                 }
             }
             return ['ok' => true];
@@ -183,8 +163,7 @@ class WebhookController extends Controller
     private function helpText(): string
     {
         return "Команды:\n" .
-            "• `get` — показать текущие наценки\n" .
-            "• `rates` — показать текущие курсы\n" .
+            "• `info` — показать текущие настройки\n" .
             "• `buy 2%` — наценка при приёме (RUB→USDT)\n" .
             "• `sell 1.5%` — наценка при выдаче (USDT→RUB)\n" .
             "\nДиапазон: 0–20%";
@@ -205,8 +184,7 @@ class WebhookController extends Controller
     private function sendMenu(int $chatId): void
     {
         $buttons = [
-            [['text' => '📊 get']],
-            [['text' => '📊 rates']],
+            [['text' => 'info']],
         ];
 
         Http::post("https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage", [
