@@ -1,8 +1,8 @@
 <?php
 
-// app/Http/Controllers/Telegram/WebhookController.php
 namespace App\Http\Controllers;
 
+use App\Services\CurrencyService;
 use App\Services\MarkupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Http;
 class WebhookController extends Controller
 {
     public function __construct(
-        private readonly MarkupService $markupService
-    ) {}
+        private readonly CurrencyService $currencyService, // ✅ добавили
+        private readonly MarkupService $markupService,
+    ) {
+    }
 
     public function handle(Request $request, string $secret)
     {
@@ -21,13 +23,21 @@ class WebhookController extends Controller
 
         $payload = $request->all();
         $message = $payload['message'] ?? $payload['edited_message'] ?? null;
-        if (!$message) return ['ok' => true];
+        if (!$message) {
+            return ['ok' => true];
+        }
 
         $chatId = $message['chat']['id'] ?? null;
         $fromId = $message['from']['id'] ?? null;
         $text = trim((string)($message['text'] ?? ''));
 
-        if (!$chatId || !$fromId || $text === '') return ['ok' => true];
+        if (!$chatId || !$fromId || $text === '') {
+            return ['ok' => true];
+        }
+
+        if (isset($message['date']) && now()->timestamp - $message['date'] > 60) {
+            return ['ok' => true]; // игнорируем старые апдейты старше 1 минуты
+        }
 
         // Проверка доступа
         $allowed = collect(explode(',', (string)config('services.telegram.allowed_user_ids')))
@@ -48,6 +58,25 @@ class WebhookController extends Controller
 
         if (str_starts_with($cmd, '/start') || str_starts_with($cmd, 'help')) {
             $this->send($chatId, $this->helpText());
+            $this->sendMenu($chatId); // показать кнопки
+            return ['ok' => true];
+        }
+
+        if ($cmd === 'rates' || $cmd === '/rates') {
+            try {
+                // берём курс RUB→USDT на 10 000 рублей и USDT→RUB на 100 USDT
+                $rubUsdt = $this->currencyService->get('rub', 'usdt', 10000);
+                $usdtRub = $this->currencyService->get('usdt', 'rub', 100);
+
+                $text = "💹 *Текущие курсы:*\n\n"
+                    . "💸 USDT → RUB: `{$usdtRub['price']} ₽`\n"
+                    . "💰 RUB → USDT: `{$rubUsdt['price']} USDT`\n";
+
+                $this->send($chatId, $text, true); // true = Markdown формат
+            } catch (\Throwable $e) {
+                $this->send($chatId, "❌ Ошибка при получении курсов:\n" . $e->getMessage());
+            }
+
             return ['ok' => true];
         }
 
@@ -57,23 +86,22 @@ class WebhookController extends Controller
         }
 
         if (str_starts_with($cmd, 'buy')) {
-            $fraction = $this->extractPercent($cmd);
+            $fraction = round(min(max($this->extractPercent($cmd), 0.0005), 0.2), 4);
+            if ($fraction < 0 || $fraction > 0.2) {
+                $this->send($chatId, "Значение вне диапазона (0–20%).", true);
+            }
             if ($fraction === null) {
                 $this->send($chatId, "Неверный формат. Пример: `buy 2%`", true);
             } else {
-                // Ограничим разумными пределами, например 0..20%
-                if ($fraction < 0 || $fraction > 0.2) {
-                    $this->send($chatId, "Значение вне диапазона (0–20%).", true);
-                } else {
-                    $this->markupService->setRubUsdt($fraction);
-                    $this->replyGet($chatId, "✅ Наценка для приёма (RUB→USDT) обновлена.");
-                }
+                $this->markupService->setRubUsdt($fraction);
+                $this->replyGet($chatId, "✅ Наценка для приёма (RUB→USDT) обновлена.");
+                $this->sendMenu($chatId); // обновить клавиатуру
             }
             return ['ok' => true];
         }
 
         if (str_starts_with($cmd, 'sell')) {
-            $fraction = $this->extractPercent($cmd);
+            $fraction = round(min(max($this->extractPercent($cmd), 0.0005), 0.2), 4);
             if ($fraction === null) {
                 $this->send($chatId, "Неверный формат. Пример: `sell 1.5%`", true);
             } else {
@@ -82,6 +110,7 @@ class WebhookController extends Controller
                 } else {
                     $this->markupService->setUsdtRub($fraction);
                     $this->replyGet($chatId, "✅ Наценка для выдачи (USDT→RUB) обновлена.");
+                    $this->sendMenu($chatId);
                 }
             }
             return ['ok' => true];
@@ -115,35 +144,39 @@ class WebhookController extends Controller
 
     private function extractPercent(string $cmd): ?float
     {
-        if (!preg_match('~(-?[\d\.,]+)\s*\%?~', $cmd, $m)) return null;
+        if (!preg_match('~(-?[\d\.,]+)\s*\%?~', $cmd, $m)) {
+            return null;
+        }
         return $this->normalizePercentToFraction($m[1]);
     }
 
     private function normalizePercentToFraction(string $num): ?float
     {
         $num = str_replace(',', '.', trim($num));
-        if (!is_numeric($num)) return null;
+        if (!is_numeric($num)) {
+            return null;
+        }
         return (float)$num / 100.0;
     }
 
     private function replyGet(int $chatId, string $prefix = null): void
     {
         $sell = $this->markupService->getUsdtRub(); // USDT->RUB
-        $buy  = $this->markupService->getRubUsdt(); // RUB->USDT
-        $msg = ($prefix ? $prefix."\n" : '') .
-            "Текущие наценки:\n".
-            "• Выдача (USDT→RUB): ".round($sell*100, 4)." %\n".
-            "• Приём  (RUB→USDT): ".round($buy*100, 4)." %";
+        $buy = $this->markupService->getRubUsdt(); // RUB->USDT
+        $msg = ($prefix ? $prefix . "\n" : '') .
+            "Текущие наценки:\n" .
+            "• Выдача (USDT→RUB): " . round($sell * 100, 4) . " %\n" .
+            "• Приём  (RUB→USDT): " . round($buy * 100, 4) . " %";
         $this->send($chatId, $msg);
     }
 
     private function helpText(): string
     {
-        return "Команды:\n".
-            "• `get` — показать текущие наценки\n".
-            "• `buy 2%` — наценка при приёме (RUB→USDT)\n".
-            "• `sell 1.5%` — наценка при выдаче (USDT→RUB)\n".
-            "• `usdt_rub 0.3%` или `rub_usdt 2%` — задать напрямую\n".
+        return "Команды:\n" .
+            "• `get` — показать текущие наценки\n" .
+            "• `rates` — показать текущие курсы\n" .
+            "• `buy 2%` — наценка при приёме (RUB→USDT)\n" .
+            "• `sell 1.5%` — наценка при выдаче (USDT→RUB)\n" .
             "\nДиапазон: 0–20%";
     }
 
@@ -157,6 +190,30 @@ class WebhookController extends Controller
                 'parse_mode' => $markdown ? 'Markdown' : null,
                 'disable_web_page_preview' => 1,
             ]);
+    }
+
+    private function sendMenu(int $chatId): void
+    {
+        // получаем текущие значения из MarkupService
+        $buyMarkup = round($this->markupService->getRubUsdt() * 100, 2);   // RUB→USDT (приём)
+        $sellMarkup = round($this->markupService->getUsdtRub() * 100, 2);  // USDT→RUB (выдача)
+
+        $buttons = [
+            [['text' => '📊 get']],
+            [
+                ['text' => "💰 buy {$buyMarkup}%"],
+                ['text' => "💸 sell {$sellMarkup}%"]
+            ],
+        ];
+
+        Http::post("https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage", [
+            'chat_id' => $chatId,
+            'text' => "Выберите команду:",
+            'reply_markup' => json_encode([
+                'keyboard' => $buttons,
+                'resize_keyboard' => true,
+            ]),
+        ]);
     }
 }
 
