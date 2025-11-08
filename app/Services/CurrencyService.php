@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use Carbon\CarbonInterval;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -28,18 +26,12 @@ class CurrencyService
             ? Str::upper($currencyTo) . '/' . Str::upper($currencyFrom)
             : Str::upper($currencyFrom) . '/' . Str::upper($currencyTo);
 
-        $cacheKey = 'currencies_' . $query . '_' . (int)$clientSum;
-
         try {
-            $response = Cache::get($cacheKey, function () use ($query) {
-                $r = Http::baseUrl('https://api.rapira.net')
-                    ->timeout(30)->connectTimeout(30)
-                    ->get('/market/exchange-plate-mini?symbol=' . $query);
+            $r = Http::baseUrl('https://api.rapira.net')
+                ->timeout(30)->connectTimeout(30)
+                ->get('/market/exchange-plate-mini?symbol=' . $query);
 
-                $json = $r->json();
-                Cache::put('currencies_' . $query . '_' . time(), $json, CarbonInterval::minutes(15));
-                return $json;
-            });
+            $response = $r->json();
         } catch (\Throwable $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
