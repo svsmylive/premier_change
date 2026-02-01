@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
@@ -32,3 +33,6 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::post('register', [UserController::class, 'register'])->name('register');
     Route::post('password-reset', [UserController::class, 'passwordReset'])->name('password-reset');
 });
+
+Route::post('/telegram/webhook/{secret}', [WebhookController::class, 'handle'])
+    ->name('telegram.webhook');
