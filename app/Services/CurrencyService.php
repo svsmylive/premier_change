@@ -41,6 +41,7 @@ class CurrencyService
             $asks = $response['ask']['items'] ?? [];
             $rubLeft = $clientSum;
             $usdtBought = 0.0;
+            $priceRubPerUsdt = 0.0;
 
             foreach ($asks as $ask) {
                 if ($rubLeft <= 0) {
@@ -80,6 +81,7 @@ class CurrencyService
                 'total' => number_format($usdtWithMarkup, 6, '.', ' '),
                 'currency_from' => $currencyFrom,
                 'currency_to' => $currencyTo,
+                'price_rapira' => $priceRubPerUsdt,
             ];
         }
 
@@ -87,6 +89,7 @@ class CurrencyService
         $bids = $response['bid']['items'] ?? [];
         $baseLeft = $clientSum;
         $quoteReceived = 0.0;
+        $priceQuotePerBase = 0.0;
 
         foreach ($bids as $bid) {
             if ($baseLeft <= 0) {
@@ -119,6 +122,7 @@ class CurrencyService
             'total' => number_format($total, 2, '.', ' '),
             'currency_from' => $currencyFrom,
             'currency_to' => $currencyTo,
+            'price_rapira' => $priceQuotePerBase,
         ];
     }
 }

@@ -78,12 +78,17 @@ class WebhookController extends Controller
                 // Курс продажи USDT за рубли (сколько ₽ получаешь за 1 USDT)
                 $sellRate = $this->currencyService->get('usdt', 'rub', 1);
                 $rubFrom1Usdt = (float)$sellRate['price'];
+                $rapiraFrom1Usdt = !empty($sellRate['price_rapira']) ? (float)$sellRate['price_rapira'] : 0;
+                $rapiraFor1Usdt = !empty($buyRate['price_rapira']) ? (float)$buyRate['price_rapira'] : 0;
 
                 // Формируем красивое сообщение
                 $text = "ℹ️ *Информация по курсам и наценкам*\n\n"
                     . "💹 *Текущие курсы:*\n"
                     . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
                     . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
+                    . "💹️ *Курс рапиры:*\n"
+                    . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt}%*\n"
+                    . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt}%*"
                     . "⚙️ *Текущие наценки:*\n"
                     . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
                     . "• USDT → RUB (продажа): *{$sellMarkup}%*";
@@ -114,12 +119,17 @@ class WebhookController extends Controller
                     : 0;
                 $sellRate = $this->currencyService->get('usdt', 'rub', 1);
                 $rubFrom1Usdt = (float)$sellRate['price'];
+                $rapiraFrom1Usdt = !empty($sellRate['price_rapira']) ? (float)$sellRate['price_rapira'] : 0;
+                $rapiraFor1Usdt = !empty($buyRate['price_rapira']) ? (float)$buyRate['price_rapira'] : 0;
 
 
                 $text = "✅ Наценка для приёма (RUB→USDT) обновлена.\n\n"
                     . "💹 *Текущие курсы:*\n"
                     . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
                     . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
+                    . "💹️ *Курс рапиры:*\n"
+                    . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt}%*\n"
+                    . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt}%*"
                     . "⚙️ *Текущие наценки:*\n"
                     . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
                     . "• USDT → RUB (продажа): *{$sellMarkup}%*";
@@ -148,11 +158,16 @@ class WebhookController extends Controller
                         : 0;
                     $sellRate = $this->currencyService->get('usdt', 'rub', 1);
                     $rubFrom1Usdt = (float)$sellRate['price'];
+                    $rapiraFrom1Usdt = !empty($sellRate['price_rapira']) ? (float)$sellRate['price_rapira'] : 0;
+                    $rapiraFor1Usdt = !empty($buyRate['price_rapira']) ? (float)$buyRate['price_rapira'] : 0;
 
                     $text = "✅ Наценка для выдачи (USDT→RUB) обновлена.\n\n"
                         . "💹 *Текущие курсы:*\n"
                         . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
                         . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
+                        . "💹️ *Курс рапиры:*\n"
+                        . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt}%*\n"
+                        . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt}%*"
                         . "⚙️ *Текущие наценки:*\n"
                         . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
                         . "• USDT → RUB (продажа): *{$sellMarkup}%*";
