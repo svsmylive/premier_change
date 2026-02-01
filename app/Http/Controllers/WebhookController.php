@@ -87,8 +87,8 @@ class WebhookController extends Controller
                     . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
                     . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
                     . "💹️ *Курс рапиры:*\n"
-                    . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt}*\n"
-                    . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt}*\n"
+                    . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt} ₽*\n"
+                    . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt} ₽*\n\n"
                     . "⚙️ *Текущие наценки:*\n"
                     . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
                     . "• USDT → RUB (продажа): *{$sellMarkup}%*";
@@ -128,8 +128,8 @@ class WebhookController extends Controller
                     . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
                     . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
                     . "💹️ *Курс рапиры:*\n"
-                    . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt}*\n"
-                    . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt}*\n"
+                    . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt} ₽*\n"
+                    . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt} ₽*\n\n"
                     . "⚙️ *Текущие наценки:*\n"
                     . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
                     . "• USDT → RUB (продажа): *{$sellMarkup}%*";
@@ -166,8 +166,8 @@ class WebhookController extends Controller
                         . "• Покупка (RUB → USDT):  *" . number_format($rubFor1Usdt, 2, '.', ' ') . " ₽*\n"
                         . "• Продажа (USDT → RUB): *" . number_format($rubFrom1Usdt, 2, '.', ' ') . " ₽*\n\n"
                         . "💹️ *Курс рапиры:*\n"
-                        . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt}*\n"
-                        . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt}*\n"
+                        . "• RUB → USDT (покупка):  *{$rapiraFor1Usdt} ₽*\n"
+                        . "• USDT → RUB (продажа): *{$rapiraFrom1Usdt} ₽*\n\n"
                         . "⚙️ *Текущие наценки:*\n"
                         . "• RUB → USDT (покупка):  *{$buyMarkup}%*\n"
                         . "• USDT → RUB (продажа): *{$sellMarkup}%*";
